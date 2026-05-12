@@ -133,34 +133,78 @@ function buildLeafletHTML (userCoord, nearestStopId, selectedStopId) {
             ).addTo(map);
         }
 
-        // Rota Inicial
+        // Rota inicial
         const initialSel = "${selectedStopId || nearestStopId || ''}";
         if (initialSel) drawRoute(initialSel);
 
-        // Ajust Zoom
+        // Ajusta zoom
         const allCoords = BUS_STOPS.map(s=>[s.coordinate.latitude,s.coordinate.longitude]);
-        allCoords.push([SCHOOL.contains.latitude, SCHOOL.coordinate.longitude]);
-        if (userCoord) allCoords.push([userCoord.latitude, userCoord.longitude]);
+        allCoords.push([SCHOOL.coordinate.latitude, SCHOOL.coordinate.longitude]);
+        if (userCoord) allCoords.push([userCoord.latitude,userCoord.longitude]);
         map.fitBounds(allCoords, {padding:[40,40]});
 
         // Mensagens do React Native
-        function handleMsg(e) {
+        function handleMsg(e){
             try {
                 const msg = JSON.parse(e.data);
                 if (msg.type==='DRAW_ROUTE') drawRoute(msg.stopId);
-                if (msg.type==='FIT_ALL') map.fitBounds(allCoords, {padding:[40,40]})
+                if (msg.type==='FIT_ALL') map.fitBounds(allCoords, {padding:[40,40]});
             } catch (_) {}
         }
         document.addEventListener('message', handleMsg);
         window.addEventListener('message', handleMsg);
-        
     <\/script>
 </body>
 </html>`;
 }
 
-
 export default function App() {
+  const webViewRef = useRef(null);
+
+  const [userLocation, setUserLocalition] = useState(null);
+  const [nearestStop, setNearestStop] = useState(null);
+  const [selectedStop, setSelectedStop] = useState(null);
+  const [locationGranted, setLocationGranted] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync(); // permissão para uso da localização
+      if ( status === 'granted' ) {
+        setLocationGranted(true); // Uso da localização permitido
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        const coord = { latitude: loc.coords.latitude, longitude: loc.coords.longitude }
+        setUserLocalition(coord);
+
+        let nearest = null, minDist = Infinity; // Infinity: maior valor possível para a comparação
+        BUS_STOPS.forEach(stop => {
+          const d = getDistance(coord, stop.coordinate);
+          if ( d < minDist) { minDist = d; nearest = { ...stop, distance: d }; }
+        });
+        setNearestStop(nearest);
+        setSelectedStop(nearest);
+      } else {
+        setSelectedStop(BUS_STOPS[0]); // Não permitiu: usa a padrão
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  function handleWebViewMessage(event) {
+    try {
+      const msg = JSON.parse(event.nativeEvent.data);
+      if (msg.type === 'SELECT_STOP'){
+        const stop = BUS_STOPS.find(s => s.id === msg.stopId);
+        if (stop) {
+          selectedStop(stop);
+          webViewRef.current?.postMessage(JSON.stringify({ type: 'DRAW_ROUTE', stopId: stop.id }));
+        }
+      }
+    } catch (_) { }
+  }
+
   return (
     <View style={styles.container}>
       <Text>Hello World!</Text>
