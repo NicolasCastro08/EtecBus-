@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { ActivityIndicator, TouchableOpacity, Platform, Linking, StyleSheet, Text, View } from 'react-native';
-import { webView } from 'react-native-webview';
+import WebView, { webView } from 'react-native-webview';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 
@@ -33,8 +33,8 @@ const BUS_STOPS = [
 // c1 e c2 = pontos que serão calculados
 function getDistance(c1, c2) {
   const R = 6371e3;
-  const q1 = (c1.latitude *Math.PI) / 180;
-  const q2 = (c2.latitude *Math.PI) / 180;
+  const q1 = (c1.latitude * Math.PI) / 180;
+  const q2 = (c2.latitude * Math.PI) / 180;
   const dq = ((c2.latitude - c1.latitude) * Math.PI) / 180;
   const dt = ((c2.longitude - c1.longitude) * Math.PI) / 180;
   const a =
@@ -48,7 +48,7 @@ function formatDistance(m) {
 }
 
 // HTML do Leaflet (OpenStreetMap - sem chave)
-function buildLeafletHTML (userCoord, nearestStopId, selectedStopId) {
+function buildLeafletHTML(userCoord, nearestStopId, selectedStopId) {
   const stopsJSON = JSON.stringify(BUS_STOPS);
   const schoolJSON = JSON.stringify(SCHOOL);
   const userJSON = userCoord ? JSON.stringify(userCoord) : 'null';
@@ -170,7 +170,7 @@ export default function App() {
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync(); // permissão para uso da localização
-      if ( status === 'granted' ) {
+      if (status === 'granted') {
         setLocationGranted(true); // Uso da localização permitido
         const loc = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced,
@@ -181,7 +181,7 @@ export default function App() {
         let nearest = null, minDist = Infinity; // Infinity: maior valor possível para a comparação
         BUS_STOPS.forEach(stop => {
           const d = getDistance(coord, stop.coordinate);
-          if ( d < minDist) { minDist = d; nearest = { ...stop, distance: d }; }
+          if (d < minDist) { minDist = d; nearest = { ...stop, distance: d }; }
         });
         setNearestStop(nearest);
         setSelectedStop(nearest);
@@ -195,7 +195,7 @@ export default function App() {
   function handleWebViewMessage(event) {
     try {
       const msg = JSON.parse(event.nativeEvent.data);
-      if (msg.type === 'SELECT_STOP'){
+      if (msg.type === 'SELECT_STOP') {
         const stop = BUS_STOPS.find(s => s.id === msg.stopId);
         if (stop) {
           selectedStop(stop);
@@ -205,10 +205,71 @@ export default function App() {
     } catch (_) { }
   }
 
+  function openNavigation(){
+
+  }
+
+  if (loading) {
+
+  }
+
+  const html = buildLeafletHTML(
+    userLocation,
+    nearestStop?.id ?? '',
+    selectedStop?.id ?? ''
+  );
+
   return (
     <View style={styles.container}>
-      <Text>Hello World!</Text>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>🚌 Ônibus para Escola</Text>
+        <Text style={styles.headerSub}>{SCHOOL.name}</Text>
+      </View>
+
+      <WebView
+        ref={webViewRef}
+        style={styles.map}
+        originWhitelist={['*']}
+        source={{ html }}
+        onMessage={handleWebViewMessage}
+        javaScriptEnabled
+        domStorageEnabled
+        mixedContentMode="always"
+      />
+
+      <TouchableOpacity
+        style={styles.fitButton}
+        onPress={() => webViewRef.current?.postMessage(JSON.stringify({ type: 'FIT_ALL ' }))}
+      >
+        <Text style={styles.fitButtonText}>🌎 Ver Todos</Text>
+      </TouchableOpacity>
+
+      <View style={styles.panel}>
+        {locationGranted && nearestStop ? (
+          <View style={styles.nearestBanner}>
+            <Text style={styles.nearestLabel}>📍 Ponto mais próximo de você</Text>
+            <Text style={styles.nearestName}>{nearestStop.name}</Text>
+            <Text style={styles.nearestDist}>{formatDistance(nearestStop.distance)} de distância</Text>
+          </View>
+        ) : !locationGranted ? (
+          <View style={styles.noGpsBanner}>
+            <Text style={styles.noGpsText}>📵 GPS Desativado - mostrando todos os pontos</Text>
+          </View>
+        ) : null}
+
+        {selectedStop && (
+          <View style={styles.selectedCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.selectedName}>{selectedStop.name}</Text>
+              <Text style={styles.selectedLines}>{selectedStop.lines.joins(' • ')}</Text>
+            </View>
+            <TouchableOpacity style={styles.navBtn} onPress={openNavigation}>
+              <Text style={styles.navBtnText}>Navegar</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
     </View>
   );
 }
@@ -216,8 +277,16 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
+    backgroundColor: '#f5f7fa',
+  },
+  loading: {
+    flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    color: '#555',
+    fontSize: 15
   },
 });
