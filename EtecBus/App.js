@@ -8,7 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 const SCHOOL = {
   id: 'school',
   name: 'ETEC Comendador João Rays',
-  coordinate: { latitude: -22.489201836318337, longitude: -48.54641407188601 },
+  coordinate: { latitude: -22.489198202294652, longitude: -48.546405739343 },
   address: 'Rua Ludovico Victório, 2140, Barra Bonita - SP'
 }
 
@@ -16,18 +16,102 @@ const BUS_STOPS = [
   {
     id: 'stop_1',
     name: 'Autoescola Muriano',
-    address: 'Rua Geraldo Fazzio, 484',
-    coordinate: { latitude: 0, longitude: 0 },
+    address: 'R. Geraldo Fazzio, 484',
+    coordinate: { latitude: -22.48428004850243, longitude: -48.56480739260246 },
     lines: ['Nova Barra'],
   },
   {
     id: 'stop_2',
-    name: '',
-    address: '',
-    coordinate: { latitude: 0, longitude: 0 },
-    lines: [''],
+    name: 'Escola Mariana',
+    address: 'R. Geraldo Fazzio, 740',
+    coordinate: { latitude: -22.482252695948073, longitude: -48.565484268506786 },
+    lines: ['Nova Barra'],
   },
-]
+  {
+    id: 'stop_3',
+    name: 'Cruzamento Rubens Pedro de Oliveira com Bernardino Santili',
+    address: 'R. Rubens Pedro de Oliveira c/ Bernardino Santili',
+    coordinate: { latitude: -22.478407834366728, longitude: -48.57461784480995 },
+    lines: ['Nova Barra'],
+  },
+  {
+    id: 'stop_4',
+    name: 'Padaria Nova Barra',
+    address: 'R. Giacomo Abruzzi c/ Santo Gatto',
+    coordinate: { latitude: -22.483343277701522, longitude: -48.57230651531636 },
+    lines: ['Nova Barra'],
+  },
+  // {
+  //   id: 'stop_5',
+  //   name: 'Vidraçaria - São Joaquim',
+  //   address: 'Estrada José Anibal, 120',
+  //   coordinate: null,
+  //   lines: ['Nova Barra'],
+  // },
+  // {
+  //   id: 'stop_6',
+  //   name: 'Beach Tenis',
+  //   address: 'Planalto verde',
+  //   coordinate: null,
+  //   lines: ['Nova Barra'],
+  // },
+  {
+    id: 'stop_7',
+    name: 'Coqueiro',
+    address: 'R. Santo Gatto c/ Santo Petri',
+    coordinate: { latitude: -22.48573, longitude: -48.57317 },
+    lines: ['Nova Barra'],
+  },
+  {
+    id: 'stop_8',
+    name: 'Edícula do Nilton',
+    address: 'R. Santo Petri c/ Batista Gabri',
+    coordinate: { latitude: -22.48573, longitude: -48.57317 },
+    lines: ['Nova Barra'],
+  },
+  {
+    id: 'stop_9',
+    name: 'Campo Alcindão',
+    address: 'R. Santo Petri',
+    coordinate: { latitude: -22.48573, longitude: -48.57317 },
+    lines: ['Nova Barra'],
+  },
+  // {
+  //   id: 'stop_10',
+  //   name: 'Boca rica',
+  //   address: 'R. Dos Imigrantes c/ R. Domingos Guedin',
+  //   coordinate: null,
+  //   lines: ['Nova Barra'],
+  // },
+  // {
+  //   id: 'stop_11',
+  //   name: 'Cerâmica do Bolacha',
+  //   address: 'R. 23 de Maio c/ Salvador de Toledo',
+  //   coordinate: null,
+  //   lines: ['Nova Barra'],
+  // },
+  // {
+  //   id: 'stop_12',
+  //   name: 'Vila nova',
+  //   address: 'R. Prudente de Morais, 1354',
+  //   coordinate: null,
+  //   lines: ['Nova Barra'],
+  // },
+  // {
+  //   id: 'stop_13',
+  //   name: 'Padaria da Elza',
+  //   address: 'Av. Caio Simões, 428',
+  //   coordinate: null,
+  //   lines: ['Nova Barra'],
+  // },
+  // {
+  //   id: 'stop_14',
+  //   name: 'Igreja Matriz',
+  //   address: 'R. Prudente de Morais',
+  //   coordinate: null,
+  //   lines: ['Nova Barra'],
+  // },
+];
 
 // Distância Haversine (metros)
 // c1 e c2 = pontos que serão calculados
@@ -273,7 +357,7 @@ export default function App() {
           <View style={styles.selectedCard}>
             <View style={{ flex: 1 }}>
               <Text style={styles.selectedName}>{selectedStop.name}</Text>
-              <Text style={styles.selectedLines}>{selectedStop.lines.joins(' • ')}</Text>
+              <Text style={styles.selectedLines}>{selectedStop.lines.join(' • ')}</Text>
             </View>
             <TouchableOpacity style={styles.navBtn} onPress={openNavigation}>
               <Text style={styles.navBtnText}>Navegar</Text>
@@ -398,6 +482,22 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1A237E',
     flexShrink: 1
+  },
+  selectedLines: {
+    fontSize: 12,
+    color: '#5C6BC0',
+    marginTop: 3
+  },
+  navBtn: {
+    backgroundColor: '#1E88E5',
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginLeft: 10
+  },
+  navBtnText:{
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 13
   }
-
 });

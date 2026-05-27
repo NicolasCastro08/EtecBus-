@@ -8,3 +8,7 @@ cd EtecBus
 npx expo install expo-location react-native-webview
 
 npx expo start --tunnel
+
+
+SALA:
+https://github.com/3Mtec2026B
