@@ -335,7 +335,7 @@ export default function App() {
 
       <TouchableOpacity
         style={styles.fitButton}
-        onPress={() => webViewRef.current?.postMessage(JSON.stringify({ type: 'FIT_ALL ' }))}
+        onPress={() => webViewRef.current?.postMessage(JSON.stringify({ type: 'FIT_ALL' }))}
       >
         <Text style={styles.fitButtonText}>🌎 Ver Todos</Text>
       </TouchableOpacity>
